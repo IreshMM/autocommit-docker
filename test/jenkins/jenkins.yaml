@@ -1,0 +1,75 @@
+credentials:
+  system:
+    domainCredentials:
+      - credentials:
+          - basicSSHUserPrivateKey:
+              id: "${INIT_REPO_CREDENTIALS_ID}"
+              privateKeySource:
+                directEntry:
+                  privateKey: "${readFile:/sshkeys/id_rsa}"
+              username: nodemon
+jenkins:
+  globalNodeProperties:
+    - envVars:
+        env:
+          - key: INIT_REPO_URL
+            value: "${INIT_REPO_URL}"
+          - key: INIT_REPO_CREDENTIALS_ID
+            value: "${INIT_REPO_CREDENTIALS_ID}"
+  agentProtocols:
+  - "JNLP4-connect"
+  - "Ping"
+  authorizationStrategy:
+    globalMatrix:
+      permissions:
+        - "USER:Overall/Administer:admin"
+        - "GROUP:Overall/Read:authenticated"
+  disableRememberMe: false
+  numExecutors: 2
+  quietPeriod: 5
+  remotingSecurity:
+    enabled: true
+  scmCheckoutRetryCount: 0
+  securityRealm:
+    local:
+      allowsSignup: false
+      enableCaptcha: false
+      users:
+      - id: "admin"
+        name: "Administrator"
+        password: 'admin'
+        properties:
+          - mailer:
+              emailAddress: "socialexpz1@gmail.com"
+security:
+  globalJobDslSecurityConfiguration:
+    useScriptSecurity: false
+  gitHostKeyVerificationConfiguration:
+    sshHostKeyVerificationStrategy:
+      noHostKeyVerificationStrategy: {}
+unclassified:
+  location:
+    adminAddress: iresh@n-able.biz
+    url: "${JENKINS_URL}"
+  gitHubPluginConfig:
+    configs:
+    - name: "GitHub"
+      apiUrl: "https://api.github.com"
+tool:
+  git:
+    installations:
+    - home: "git"
+      name: "Default"
+  maven:
+    installations:
+    - name: "maven3"
+      properties:
+      - installSource:
+          installers:
+          - maven:
+              id: "3.8.6"
+  mavenGlobalConfig:
+    globalSettingsProvider: "standard"
+    settingsProvider: "standard"
+jobs:
+  - file: /var/jenkins_home/seedjob.groovy

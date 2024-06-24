@@ -1,0 +1,75 @@
+name: jenkins-autocommit-trigger-test
+services:
+  trigger:
+    build: ../
+    image: ireshmm/jenkins-autocommit-trigger:test
+    command: help
+    volumes:
+      - ./job/init-job:/home/nodemon/source
+      - sshkeys:/sshkeys
+    networks:
+      - jenkins-test
+    ports:
+      - 2022:2022
+    environment:
+      - JENKINS_URL=http://jenkins:8080
+      - JENKINS_USER=admin
+      - JENKINS_PASS=admin
+    depends_on:
+      jenkins:
+        condition: service_healthy
+      sshkeygen:
+        condition: service_completed_successfully
+    stop_grace_period: 1s
+    develop:
+      watch:
+        - path: ../config
+          action: rebuild
+        - path: ../scripts
+          action: rebuild
+        - path: ../Dockerfile
+          action: rebuild
+  sshkeygen:
+    image: linuxserver/openssh-server
+    command: 
+      - | 
+        test -f /sshkeys/id_rsa || \
+        ssh-keygen -t rsa -b 4096 -f /sshkeys/id_rsa -C 'jenkins@jenkins' && \
+        chown -R 1000:1000 /sshkeys
+    entrypoint:
+      - /bin/bash
+      - -c
+    volumes:
+      - sshkeys:/sshkeys
+  jenkins:
+    build: jenkins
+    image: ireshmm/jenkins:test-jdk17
+    volumes:
+      - jenkins_data:/var/jenkins_home
+      - ./jenkins/jenkins.yaml:/var/jenkins_home/jenkins.yaml
+      - ./jenkins/seedjob.groovy:/var/jenkins_home/seedjob.groovy
+      - sshkeys:/sshkeys
+    networks:
+      - jenkins-test
+    ports:
+      - 9090:8080
+    environment:
+      - JENKINS_URL=http://localhost:9090
+      - INIT_REPO_URL=ssh://nodemon@trigger:2022/home/nodemon/target
+      - INIT_REPO_CREDENTIALS_ID=git-ssh-cred
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/login"]
+      start_period: 10s
+      interval: 10s
+      timeout: 10s
+      retries: 7
+    depends_on:
+      sshkeygen:
+        condition: service_completed_successfully
+
+volumes:
+  jenkins_data:
+  sshkeys:
+networks:
+  jenkins-test:
+    name: jenkins-test
