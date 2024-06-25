@@ -1,9 +1,21 @@
 pipeline {
     agent any
     stages {
-        stage('Initialize') {
+        stage('Read Jobs') {
             steps {
-                echo 'Initializing...'
+                script {
+                    jobs = readYaml file: 'jobs.yaml'
+                }
+            }
+        }
+        stage('Create Jobs') {
+            steps {
+                script {
+                    jobs.each { job ->
+                        checkout scmGit(branches: [[name: '*/master']], extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: job.name]], userRemoteConfigs: [[credentialsId: env.INIT_REPO_CREDENTIALS_ID, url: job.url]])
+                        jobDsl targets: "${job.name}/JobDSL.groovy", additionalParameters: [repo_url: job.url]
+                    }
+                }
             }
         }
     }

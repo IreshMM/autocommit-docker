@@ -19,6 +19,13 @@ services:
         condition: service_healthy
       sshkeygen:
         condition: service_completed_successfully
+  test_job_trigger:
+    extends:
+      service: init_job_trigger
+    volumes:
+      - ./job/test-job:/home/nodemon/source
+      - ./test-job-action.sh:/action.sh
+      - sshkeys:/sshkeys
 
 volumes:
   jenkins_data:

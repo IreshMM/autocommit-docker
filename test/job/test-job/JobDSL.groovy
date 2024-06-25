@@ -4,7 +4,13 @@ pipelineJob("test-job") {
         cpsScm {
             lightweight(true)
             scm {
-                git("ssh://nodemon@nodemon:target.git")
+                git {
+                    remote {
+                        url(repo_url)
+                        credentials(INIT_REPO_CREDENTIALS_ID)
+                    }
+                    branch('master')
+                }
             }
             scriptPath("Jenkinsfile")
         }

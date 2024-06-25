@@ -1,0 +1,2 @@
+- name: test-job
+  url: ssh://nodemon@test_job_trigger:2022/home/nodemon/target
