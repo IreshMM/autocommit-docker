@@ -6,4 +6,4 @@ source $SCRIPTS_DIR/functions.sh
 
 sync_target
 commit
-jenkins_cli $ARGS
+source /action.sh

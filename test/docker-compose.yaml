@@ -1,11 +1,11 @@
 name: jenkins-autocommit-trigger-test
 services:
   trigger:
-    build: ../
+    build: ../src
     image: ireshmm/jenkins-autocommit-trigger:test
-    command: help
     volumes:
       - ./job/init-job:/home/nodemon/source
+      - ./action.sh:/action.sh
       - sshkeys:/sshkeys
     networks:
       - jenkins-test
@@ -31,8 +31,8 @@ services:
           action: rebuild
   sshkeygen:
     image: linuxserver/openssh-server
-    command: 
-      - | 
+    command:
+      - |
         test -f /sshkeys/id_rsa || \
         ssh-keygen -t rsa -b 4096 -f /sshkeys/id_rsa -C 'jenkins@jenkins' && \
         chown -R 1000:1000 /sshkeys
