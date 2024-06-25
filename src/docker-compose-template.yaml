@@ -1,0 +1,19 @@
+services:
+  trigger:
+    build: .
+    image: ireshmm/jenkins-autocommit-trigger:test
+    volumes:
+      - sshkeys:/sshkeys
+    environment:
+      - JENKINS_URL=http://jenkins:8080
+      - JENKINS_USER=admin
+      - JENKINS_PASS=admin
+    stop_grace_period: 1s
+    develop:
+      watch:
+        - path: ./config
+          action: rebuild
+        - path: ./scripts
+          action: rebuild
+        - path: ./Dockerfile
+          action: rebuild

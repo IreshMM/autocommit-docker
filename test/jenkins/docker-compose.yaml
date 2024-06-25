@@ -1,0 +1,26 @@
+services:
+  jenkins:
+    build: jenkins
+    image: ireshmm/jenkins:test-jdk17
+    volumes:
+      - ./jenkins.yaml:/var/jenkins_home/jenkins.yaml
+      - ./seedjob.groovy:/var/jenkins_home/seedjob.groovy
+      - jenkins_data:/var/jenkins_home
+      - sshkeys:/sshkeys
+    networks:
+      - jenkins-test
+    ports:
+      - 9090:8080
+    environment:
+      - JENKINS_URL=http://localhost:9090
+      - INIT_REPO_URL=ssh://nodemon@init_job_trigger:2022/home/nodemon/target
+      - INIT_REPO_CREDENTIALS_ID=git-ssh-cred
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/login"]
+      start_period: 10s
+      interval: 10s
+      timeout: 10s
+      retries: 7
+    depends_on:
+      sshkeygen:
+        condition: service_completed_successfully

@@ -1,0 +1,13 @@
+services:
+  sshkeygen:
+    image: linuxserver/openssh-server
+    command:
+      - |
+        test -f /sshkeys/id_rsa || \
+        ssh-keygen -t rsa -b 4096 -f /sshkeys/id_rsa -C 'jenkins@jenkins' && \
+        chown -R 1000:1000 /sshkeys
+    entrypoint:
+      - /bin/bash
+      - -c
+    volumes:
+      - sshkeys:/sshkeys
